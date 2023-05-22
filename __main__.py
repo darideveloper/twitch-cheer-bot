@@ -1,4 +1,4 @@
-from bots import BotsManager
+from bot import BotManager
 
 if __name__ == "__main__":
     BotsManager()
