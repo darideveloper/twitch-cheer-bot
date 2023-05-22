@@ -1,10 +1,6 @@
 import os
 import requests
-from dotenv import load_dotenv
-
-load_dotenv()
-API_HOST = os.getenv("API_HOST")
-TOKEN = os.getenv("TOKEN")
+from credentials import API_HOST, TOKEN
 
 
 class Api ():
@@ -38,12 +34,14 @@ class Api ():
             Example:
             [
                 {
-                    "user": "SoyUnFarsantee",
-                    "streamer": "pipevillanu3va",
-                    "minute": 10,
-                    "amount": 1,
-                    "message": "eres un pro",
-                    "status": false
+                    'id': 20,
+                    'user': 'soyunfarsantee', 
+                    'admin': 'daridev-admin', 
+                    'stream_chat_link': 'https://www.twitch.tv/popout/blue_rebel_/chat?popout=', 
+                    'time': '00:21:51', 
+                    'amount': 1, 
+                    'message': 'Holaaaaa', 
+                    'cookies': [...] 
                 }
                 ...
             ]
@@ -54,16 +52,6 @@ class Api ():
         # Get data from api
         res = self.__requests_url__("donations")
         return res.json()
-    
-    # def disable_donation (self, username:str): 
-    #     """ Disable user in the API
-
-    #     Args:
-    #         username (str): user name to disable
-    #     """
-        
-    #     res = self.__requests_url__("disable-user/" + username)
-    #     print (f"\t{username}: {res.text}")
         
 if __name__ == "__main__":
     api = Api()
