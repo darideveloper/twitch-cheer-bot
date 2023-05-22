@@ -1,6 +1,8 @@
 import os
 from time import sleep
 from datetime import datetime
+from threading import Thread
+from random import randint
 
 from api import Api
 from credentials import PORT
@@ -51,7 +53,9 @@ class Bot (ChromDevWrapper):
             # Show donation data       
             self.__show_message__ (f"bot: '{user}', time: {time}, stramer: '{streamer}', message: '{message}', amount: {amount}", donation["id"]) 
             
-            self.submit_donation (id, user, stream_chat_link, time, message, amount, cookies)
+            # Submit donation with thread
+            thread = Thread (target=self.submit_donation, args=(id, user, stream_chat_link, time, message, amount, cookies))
+            thread.start()
         
     def __show_message__ (self, message:str, id:int=0, is_error:bool=False):
         """ print error message
@@ -154,18 +158,37 @@ class Bot (ChromDevWrapper):
         return donation_sent
         
     def submit_donation (self, id:int, user:str, stream_chat_link:str, 
-                         time:datetime, message:str, amount:int, cookies:list):
+                         time_str:str, message:str, amount:int, cookies:list):
         """ Send donation to twitch chat
 
         Args:
             id (int): donation id
             user (str): user that send the donation (bot)
             stream_chat_link (str): link to the chat of the stream
-            time (datetime): time when the donation will be send
+            time (str): time text in format "hh:mm:ss"
             message (str): message to send
             amount (int): bits of the donation
             cookies (list): cookies to login in twitch with the bot
         """
+        
+        # Wait random seconds
+        sleep (randint (0, 60))
+        
+        # Donation time
+        donation_time = datetime.strptime (time_str, "%H:%M:%S")
+        now = datetime.now ()
+        donation_time = donation_time.replace (year=now.year, month=now.month, day=now.day)
+        
+        # Validate lost donation times
+        if now > donation_time:
+            self.__show_message__ ("Donation time lost", id, is_error=True)
+            return None
+        
+        # Wait until donation time
+        while donation_time > now:
+            sleep (60)
+            now = datetime.now ()
+            self.__show_message__ (f"Waiting for next donation...")
         
         # Login in twitch and validate
         logged = self.__login__ (cookies, id)
@@ -185,21 +208,21 @@ class Bot (ChromDevWrapper):
         donation_text = f"cheer{amount} {message}"
         self.send_data (self.selectors["comment_textarea"], donation_text)
         
-        # Accept chat rules and submit donation
-        comment_accept_elem = self.count_elems (self.selectors["comment_accept_btn"])
-        if comment_accept_elem:
-            self.click (self.selectors["comment_accept_btn"])
+        # # Accept chat rules and submit donation
+        # comment_accept_elem = self.count_elems (self.selectors["comment_accept_btn"])
+        # if comment_accept_elem:
+        #     self.click (self.selectors["comment_accept_btn"])
             
-            # Write message (again)
-            donation_text = f"cheer{amount} {message}"
-            self.send_data (self.selectors["comment_textarea"], donation_text)
+        #     # Write message (again)
+        #     donation_text = f"cheer{amount} {message}"
+        #     self.send_data (self.selectors["comment_textarea"], donation_text)
             
-        # Submit donation
-        self.click (self.selectors["comment_send_btn"])
+        # # Submit donation
+        # self.click (self.selectors["comment_send_btn"])
         
-        donation_sent = self.__validate_submit__ (id)
-        if donation_sent:
-            self.__show_message__ ("Donation sent", id)
+        # donation_sent = self.__validate_submit__ (id)
+        # if donation_sent:
+        #     self.__show_message__ ("Donation sent", id)
         
 
 
