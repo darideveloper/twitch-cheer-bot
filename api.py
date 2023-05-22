@@ -58,14 +58,31 @@ class Api ():
 
         Args:
             id (int): donation id
+            
+        Returns:
+            str: response of the request
         """
         
         endpoint = f"update-donation/{id}"
         res = self.__requests_url__(endpoint)
         return res.text
     
+    def disable_user (self, name:str) -> str:
+        """ Disable user / bot when cookies are not valid
+
+        Args:
+            name (str): bot name
+        
+        Returns:
+            str: response of the request
+        """
+        
+        endpoint = f"disable-user/{name}"
+        res = self.__requests_url__(endpoint)
+        return res.text        
+    
         
 if __name__ == "__main__":
     api = Api()
-    data = api.set_donation_done(11)
+    data = api.get_donations ()
     print (data)
