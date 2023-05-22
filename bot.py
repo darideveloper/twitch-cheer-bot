@@ -24,6 +24,7 @@ class Bot (ChromDevWrapper):
             'comment_warning_before': '.chat-input-tray__clickable',
             'comment_warning_after': '[data-test-selector="full-error"]',
         }
+        self.running = False
         
         # Connect to chrome
         super().__init__(port=PORT)
@@ -54,7 +55,7 @@ class Bot (ChromDevWrapper):
             self.__show_message__ (f"bot: '{user}', time: {time}, stramer: '{streamer}', message: '{message}', amount: {amount}", donation["id"]) 
             
             # Submit donation with thread
-            thread = Thread (target=self.submit_donation, args=(id, user, stream_chat_link, time, message, amount, cookies))
+            thread = Thread (target=self.submit_donation, args=(id, stream_chat_link, time, message, amount, cookies))
             thread.start()
         
     def __show_message__ (self, message:str, id:int=0, is_error:bool=False):
@@ -171,8 +172,8 @@ class Bot (ChromDevWrapper):
         """
         
         # Wait random seconds
-        sleep (randint (0, 60))
-        
+        sleep (randint (0, 30))
+            
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")
         now = datetime.now ()
@@ -181,17 +182,28 @@ class Bot (ChromDevWrapper):
         # Validate lost donation times
         if now > donation_time:
             self.__show_message__ ("Donation time lost", id, is_error=True)
+            self.running = False
             return None
         
         # Wait until donation time
         while donation_time > now:
-            sleep (60)
+            sleep (15)
             now = datetime.now ()
-            self.__show_message__ (f"Waiting for next donation...")
+            
+        # Update status or wait until other donations are send
+        if not self.running: 
+            self.running = True
+        else:
+            while self.running:
+                sleep (randint (0, 5))
+        
+        # Show start donation status 
+        self.__show_message__ ("Donation time", id)
         
         # Login in twitch and validate
         logged = self.__login__ (cookies, id)
         if not logged:
+            self.running = False
             return None
                     
         # Go to chat page
@@ -201,6 +213,7 @@ class Bot (ChromDevWrapper):
         # Validate inputs
         inputs_valid = self.__validate_inputs__ (id)
         if not inputs_valid:
+            self.running = False
             return None
         
         # Write message
@@ -222,6 +235,8 @@ class Bot (ChromDevWrapper):
         # donation_sent = self.__validate_submit__ (id)
         # if donation_sent:
         #     self.__show_message__ ("Donation sent", id)
+        
+        self.running = False
         
 
 
