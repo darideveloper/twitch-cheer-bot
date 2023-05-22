@@ -17,7 +17,7 @@ class Bot (ChromDevWrapper):
         # variables
         self.api = Api()
         self.selectors = {
-            'twitch-login-btn': 'button[data-a-target="login-button"]',
+            'twitch_login_input': '#login-username',
             'comment_textarea': '[role="textbox"]',
             'comment_send_btn': 'button[data-a-target="chat-send-button"]',
             'comment_accept_btn': 'button[data-test-selector="chat-rules-ok-button"]',
@@ -55,7 +55,7 @@ class Bot (ChromDevWrapper):
             self.__show_message__ (f"bot: '{user}', time: {time}, stramer: '{streamer}', message: '{message}', amount: {amount}", donation["id"]) 
             
             # Submit donation with thread
-            thread = Thread (target=self.submit_donation, args=(id, stream_chat_link, time, message, amount, cookies))
+            thread = Thread (target=self.submit_donation, args=(id, stream_chat_link, user, time, message, amount, cookies))
             thread.start()
         
     def __show_message__ (self, message:str, id:int=0, is_error:bool=False):
@@ -97,8 +97,8 @@ class Bot (ChromDevWrapper):
         
         # Validate login
         self.set_page ("https://www.twitch.tv/login")    
-        login_button_visible = self.count_elems (self.selectors["twitch-login-btn"])
-        if login_button_visible:
+        login_input_visible = self.count_elems (self.selectors["twitch_login_input"])
+        if login_input_visible:
             
             # Show error and update status
             self.__show_message__ (f"cookies error, bot: {user}", id, is_error=True)
@@ -161,13 +161,14 @@ class Bot (ChromDevWrapper):
             
         return donation_sent
         
-    def submit_donation (self, id:int, stream_chat_link:str, 
+    def submit_donation (self, id:int, stream_chat_link:str, user:str,
                          time_str:str, message:str, amount:int, cookies:list):
         """ Send donation to twitch chat
 
         Args:
             id (int): donation id
             stream_chat_link (str): link to the chat of the stream
+            user (str): bot name
             time (str): time text in format "hh:mm:ss"
             message (str): message to send
             amount (int): bits of the donation
@@ -204,7 +205,7 @@ class Bot (ChromDevWrapper):
         self.__show_message__ ("starting...", id)
         
         # Login in twitch and validate
-        logged = self.__login__ (cookies, id)
+        logged = self.__login__ (cookies, id, user)
         if not logged:
             self.running = False
             return None
