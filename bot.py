@@ -157,13 +157,12 @@ class Bot (ChromDevWrapper):
             
         return donation_sent
         
-    def submit_donation (self, id:int, user:str, stream_chat_link:str, 
+    def submit_donation (self, id:int, stream_chat_link:str, 
                          time_str:str, message:str, amount:int, cookies:list):
         """ Send donation to twitch chat
 
         Args:
             id (int): donation id
-            user (str): user that send the donation (bot)
             stream_chat_link (str): link to the chat of the stream
             time (str): time text in format "hh:mm:ss"
             message (str): message to send
