@@ -181,7 +181,7 @@ class Bot (ChromDevWrapper):
         
         # Validate lost donation times
         if now > donation_time:
-            self.__show_message__ ("Donation time lost", id, is_error=True)
+            self.__show_message__ ("time lost", id, is_error=True)
             self.running = False
             return None
         
@@ -198,7 +198,7 @@ class Bot (ChromDevWrapper):
                 sleep (randint (0, 5))
         
         # Show start donation status 
-        self.__show_message__ ("Donation time", id)
+        self.__show_message__ ("starting...", id)
         
         # Login in twitch and validate
         logged = self.__login__ (cookies, id)
@@ -234,7 +234,7 @@ class Bot (ChromDevWrapper):
         
         donation_sent = self.__validate_submit__ (id)
         if donation_sent:
-            self.__show_message__ ("Donation sent", id)
+            self.__show_message__ ("sent", id)
         
         self.running = False
         
