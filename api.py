@@ -52,8 +52,20 @@ class Api ():
         # Get data from api
         res = self.__requests_url__("donations")
         return res.json()
+    
+    def set_donation_done (self, id:int) -> str:
+        """ Set status donation to done
+
+        Args:
+            id (int): donation id
+        """
+        
+        endpoint = f"update-donation/{id}"
+        res = self.__requests_url__(endpoint)
+        return res.text
+    
         
 if __name__ == "__main__":
     api = Api()
-    data = api.get_donations()
+    data = api.set_donation_done(11)
     print (data)
