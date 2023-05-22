@@ -220,23 +220,28 @@ class Bot (ChromDevWrapper):
         donation_text = f"cheer{amount} {message}"
         self.send_data (self.selectors["comment_textarea"], donation_text)
         
-        # # Accept chat rules and submit donation
-        # comment_accept_elem = self.count_elems (self.selectors["comment_accept_btn"])
-        # if comment_accept_elem:
-        #     self.click (self.selectors["comment_accept_btn"])
+        # Accept chat rules and submit donation
+        comment_accept_elem = self.count_elems (self.selectors["comment_accept_btn"])
+        if comment_accept_elem:
+            self.click (self.selectors["comment_accept_btn"])
             
-        #     # Write message (again)
-        #     donation_text = f"cheer{amount} {message}"
-        #     self.send_data (self.selectors["comment_textarea"], donation_text)
+            # Write message (again)
+            donation_text = f"cheer{amount} {message}"
+            self.send_data (self.selectors["comment_textarea"], donation_text)
             
-        # # Submit donation
-        # self.click (self.selectors["comment_send_btn"])
+        # Submit donation
+        self.click (self.selectors["comment_send_btn"])
         
-        # donation_sent = self.__validate_submit__ (id)
-        # if donation_sent:
-        #     self.__show_message__ ("Donation sent", id)
+        donation_sent = self.__validate_submit__ (id)
+        if donation_sent:
+            self.__show_message__ ("Donation sent", id)
         
         self.running = False
+        
+        # Update donation status
+        response = self.api.set_donation_done (id) 
+        if response != "Donation updated":
+            self.__show_message__ ("not updated", id, is_error=True)
         
 
 
