@@ -62,15 +62,18 @@ class ChromDevWrapper ():
         """
         
         for cookie in cookies:
-            self.chrome.Network.setCookie(
-                name=cookie["name"], 
-                value=cookie["value"], 
-                domain=cookie["domain"], 
-                path=cookie["path"], 
-                secure=cookie["secure"], 
-                httpOnly=cookie["httpOnly"], 
-                sameSite=cookie["sameSite"]
-            )
+            try:
+                self.chrome.Network.setCookie(
+                    name=cookie["name"], 
+                    value=cookie["value"], 
+                    domain=cookie["domain"], 
+                    path=cookie["path"], 
+                    secure=cookie["secure"], 
+                    httpOnly=cookie["httpOnly"], 
+                    sameSite=cookie["sameSite"]
+                )
+            except:
+                pass
                 
         sleep (self.base_wait_time)
             

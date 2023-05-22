@@ -76,12 +76,13 @@ class Bot (ChromDevWrapper):
         
         print (f"{prefix}{message}")
         
-    def __login__ (self, cookies:list, id:int)-> bool:
+    def __login__ (self, cookies:list, id:int, user:str)-> bool:
         """ Set cookies to login in twitch
 
         Args:
             cookies (list): cookies to login in twitch with the bot
             id (int): donation id
+            user (str): bot name
 
         Returns:
             bool: True if the login was successful
@@ -100,12 +101,14 @@ class Bot (ChromDevWrapper):
         if login_button_visible:
             
             # Show error and update status
-            self.__show_message__ ("cookies error", id, is_error=True)
+            self.__show_message__ (f"cookies error, bot: {user}", id, is_error=True)
             logged = False
             
-            # TODO: Disable user in backend
-            # self.api.disable_user (self.username)
-            
+            #  Disable user in
+            response = self.api.disable_user (user)
+            if response != "User disabled":
+                self.__show_message__ (f"bot {user} not disabled", id, is_error=True)
+                                       
         return logged 
     
     def __validate_inputs__ (self, id:int) -> bool:
@@ -242,8 +245,6 @@ class Bot (ChromDevWrapper):
         response = self.api.set_donation_done (id) 
         if response != "Donation updated":
             self.__show_message__ ("not updated", id, is_error=True)
-        
-
 
 if __name__ == "__main__":
     bot = Bot ()
