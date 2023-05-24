@@ -20,7 +20,10 @@ class Bot (ChromDevWrapper):
             'twitch_login_input': '#login-username',
             'comment_textarea': '[role="textbox"]',
             'comment_send_btn': 'button[data-a-target="chat-send-button"]',
-            'comment_accept_btn': 'button[data-test-selector="chat-rules-ok-button"]',
+            'comment_accept_buttons': [
+                'button[data-test-selector="chat-rules-ok-button"]',
+                'button[data-test-selector="chat-rules-show-intro-button"]',
+            ],
             'comment_warning_before': '.chat-input-tray__clickable',
             'comment_warning_after': '[data-test-selector="full-error"]',
         }
@@ -224,15 +227,17 @@ class Bot (ChromDevWrapper):
         donation_text = f"cheer{amount} {message}"
         self.send_data (self.selectors["comment_textarea"], donation_text)
         
-        # Accept chat rules and submit donation
-        comment_accept_elem = self.count_elems (self.selectors["comment_accept_btn"])
-        if comment_accept_elem:
-            self.click (self.selectors["comment_accept_btn"])
+        # Click in accept buttons
+        for selector in self.selectors["comment_accept_buttons"]:
             
-            # Write message (again)
-            donation_text = f"cheer{amount} {message}"
-            self.send_data (self.selectors["comment_textarea"], donation_text)
-            
+            accept_elem = self.count_elems (selector)
+            if accept_elem:
+                self.click (selector)
+                
+                # Write message (again)
+                donation_text = f"cheer{amount} {message}"
+                self.send_data (self.selectors["comment_textarea"], donation_text)
+                
         # Submit donation
         self.click (self.selectors["comment_send_btn"])
         
