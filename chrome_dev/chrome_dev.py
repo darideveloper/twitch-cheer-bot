@@ -1,4 +1,5 @@
 from time import sleep
+import sys
 
 import PyChromeDevTools
 
@@ -16,8 +17,9 @@ class ChromDevWrapper ():
         try:
             self.chrome = PyChromeDevTools.ChromeInterface(port=port)
         except:
-            print ("Chome is not open. Please open chrome with the custom shorcut and try again.")
-            quit ()
+            print ("Chrome is not open. Please open chrome with the custom shorcut and try again.")
+            sys.exit (1)
+            
         self.chrome.Network.enable()
         self.chrome.Page.enable()
         

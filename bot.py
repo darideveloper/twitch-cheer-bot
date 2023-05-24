@@ -1,4 +1,4 @@
-import os
+import sys
 from time import sleep
 from datetime import datetime
 from threading import Thread
@@ -28,6 +28,7 @@ class Bot (ChromDevWrapper):
             'comment_warning_after': '[data-test-selector="full-error"]',
         }
         self.running = False
+        self.error = False
         
         # Connect to chrome
         super().__init__(port=PORT)
@@ -40,6 +41,7 @@ class Bot (ChromDevWrapper):
             self.__show_message__ ("No donations to send")
         
         # Submit each donation
+        threads = []
         for donation in donations:
             
             # Format data
@@ -60,6 +62,17 @@ class Bot (ChromDevWrapper):
             # Submit donation with thread
             thread = Thread (target=self.submit_donation, args=(id, stream_chat_link, user, time, message, amount, cookies))
             thread.start()
+            threads.append (thread)
+            
+        # Wait for threads to end
+        while True:
+            if not any ([thread.is_alive() for thread in threads]):
+                break
+            sleep (1)
+            
+            # Raise error when end
+            if self.error:
+                sys.exit (1)
         
     def __show_message__ (self, message:str, id:int=0, is_error:bool=False):
         """ print error message
@@ -73,6 +86,7 @@ class Bot (ChromDevWrapper):
         prefix = "Info: "
         if is_error:
             prefix = "Error: "
+            self.error = True
             
         if id != 0:
             prefix += f"Donation {id}: "
