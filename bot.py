@@ -148,12 +148,8 @@ class Bot (ChromDevWrapper):
             inputs_valid = False
             
         # Validate error messages
-        errors = [
-            "Followers-Only Chat",
-            "Verified Accounts Only Chat",
-        ]
         warning_text = self.get_text (self.selectors["comment_warning_before"])
-        if warning_text in errors:
+        if warning_text:
             self.__show_message__ (f"Inputs not available: {warning_text}", id, is_error=True)
             inputs_valid = False
             
