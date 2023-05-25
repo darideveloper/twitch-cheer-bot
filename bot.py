@@ -225,7 +225,7 @@ class Bot (ChromDevWrapper):
                     
         # Go to chat page
         self.set_page (stream_chat_link)
-        sleep (5)
+        sleep (10)
         
         # Validate inputs
         inputs_valid = self.__validate_inputs__ (id)
@@ -236,6 +236,7 @@ class Bot (ChromDevWrapper):
         # Write message
         donation_text = f"cheer{amount} {message}"
         self.send_data (self.selectors["comment_textarea"], donation_text)
+        sleep (5)
         
         # Click in accept buttons
         for selector in self.selectors["comment_accept_buttons"]:
