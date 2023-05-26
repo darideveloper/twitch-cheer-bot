@@ -83,7 +83,7 @@ class Bot (ChromDevWrapper):
             
         # Wait for threads to end
         while True:
-            if any ([thread.is_alive() for thread in threads]):
+            if threads and any ([thread.is_alive() for thread in threads]):
                 sleep (1)
                 continue
             
@@ -93,6 +93,8 @@ class Bot (ChromDevWrapper):
             # Raise error when end
             if self.error:
                 sys.exit (1)
+
+            break
         
     def __show_message__ (self, message:str, id:int=0, is_error:bool=False):
         """ print error message
