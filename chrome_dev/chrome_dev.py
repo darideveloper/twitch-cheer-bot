@@ -1,5 +1,6 @@
 import os
 import sys
+import subprocess
 from time import sleep
 
 import PyChromeDevTools
@@ -163,4 +164,5 @@ class ChromDevWrapper ():
         
         self.chrome.close ()
         if kill_chrome:
-            os.system ("taskkill /F /IM chrome.exe /T")
+            command = "taskkill /F /IM chrome.exe /T > nul"
+            subprocess.run (command, shell=True)
