@@ -5,8 +5,8 @@ from threading import Thread
 from random import randint
 
 from api import Api
-from credentials import PORT
 from chrome_dev.chrome_dev import ChromDevWrapper
+from credentials import PORT
 
 class Bot (ChromDevWrapper):
     
@@ -30,15 +30,15 @@ class Bot (ChromDevWrapper):
         self.running = False
         self.error = False
         
-        # Connect to chrome
-        super().__init__(port=PORT)
-        
         # Get data from api
         donations = self.api.get_donations()
         print ()
         
         if not donations:
             self.__show_message__ ("No donations to send")
+            
+        # Connect to chrome
+        super().__init__(port=PORT)
         
         # Submit each donation
         threads = []
@@ -67,7 +67,12 @@ class Bot (ChromDevWrapper):
         # Wait for threads to end
         while True:
             if not any ([thread.is_alive() for thread in threads]):
+                # End chrome
+                self.quit ()
+                
+                # End wait time
                 break
+            
             sleep (1)
             
             # Raise error when end
@@ -189,7 +194,7 @@ class Bot (ChromDevWrapper):
         """
         
         # Wait random seconds
-        sleep (randint (0, 30))
+        sleep (randint (0, 15))
             
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")

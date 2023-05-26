@@ -1,16 +1,35 @@
-from time import sleep
+import os
 import sys
+from time import sleep
 
 import PyChromeDevTools
 
+from credentials import CHROME_PATH
+
 class ChromDevWrapper ():
     
-    def __init__ (self, port:int):    
-        """ Conhect to chrome using PyChromeDevTools
+    def __init__ (self, port:int, proxy_host:str="", proxy_port:str="", start_chrome:bool=True):    
+        """ Open chrome and conhect using PyChromeDevTools
 
         Args:
             port (int): port or chrome running in debug mode
+            proxy_host (str, optional): Proxy ip. Defaults to "".
+            proxy_port (str, optional): Proxy port. Defaults to "".
+            start_chrome (bool, optional): Open new chrome instance. Defaults to True.
         """
+        
+        if start_chrome:
+            
+            print (f"Starting chrome at port {port}...")
+            
+            command = f'"{CHROME_PATH}" --remote-debugging-port={port} --remote-allow-origins=*'
+            if proxy_host != "" and proxy_port != "":
+                # Start chrome with proxies
+                command += f' --proxy-server={proxy_host}:{proxy_port}'
+                
+            os.popen (command)
+                
+            sleep (5)
         
         self.base_wait_time = 2
         
@@ -134,3 +153,14 @@ class ChromDevWrapper ():
             return response[0]['result']["result"]["value"].strip()
         except:
             return ""
+        
+    def quit (self, kill_chrome:bool=True):
+        """ Close chrome and conexion   
+
+        Args:
+            kill_chrome (bool, optional): Kill (true) all chrome windows. Defaults to True.
+        """
+        
+        self.chrome.close ()
+        if kill_chrome:
+            os.system ("taskkill /F /IM chrome.exe /T")
