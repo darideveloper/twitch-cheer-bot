@@ -31,14 +31,20 @@ class Bot (ChromDevWrapper):
         self.error = False
         
         # Get data from api
-        donations = self.api.get_donations()
+        data = self.api.get_donations()
+        donations = data["donations"]
+        self.proxy = data["proxy"]
         print ()
         
         if not donations:
             self.__show_message__ ("No donations to send")
             
         # Connect to chrome
-        super().__init__(port=PORT)
+        super().__init__(
+            port=PORT, 
+            proxy_host=self.proxy["host"],
+            proxy_port=self.proxy["port"]
+        )
         
         # Submit each donation
         threads = []
@@ -195,6 +201,13 @@ class Bot (ChromDevWrapper):
         
         # Wait random seconds
         sleep (randint (0, 15))
+        
+        # Test proxies loading a page
+        self.set_page ("https://ipinfo.io/json")
+        body = self.get_text ("body")
+        if not '"ip":' in body:
+            self.__show_message__ (f"proxy not working: {self.proxy}", id, is_error=True)
+            return None
             
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")

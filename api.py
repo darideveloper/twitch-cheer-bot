@@ -32,19 +32,25 @@ class Api ():
             dict: donations data.
 
             Example:
-            [
-                {
-                    'id': 20,
-                    'user': 'soyunfarsantee', 
-                    'admin': 'daridev-admin', 
-                    'stream_chat_link': 'https://www.twitch.tv/popout/blue_rebel_/chat?popout=', 
-                    'time': '00:21:51', 
-                    'amount': 1, 
-                    'message': 'Holaaaaa', 
-                    'cookies': [...] 
-                }
-                ...
-            ]
+            {
+                "proxies": {
+                    "host": self.proxy.host,
+                    "port": self.proxy.port,
+                },
+                "donations": [
+                    {
+                        'id': 20,
+                        'user': 'soyunfarsantee', 
+                        'admin': 'daridev-admin', 
+                        'stream_chat_link': 'https://www.twitch.tv/popout/blue_rebel_/chat?popout=', 
+                        'time': '00:21:51', 
+                        'amount': 1, 
+                        'message': 'Holaaaaa', 
+                        'cookies': [...] 
+                    }
+                    ...
+                ]
+            }
         """
 
         print("getting donations...")
