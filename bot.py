@@ -38,6 +38,7 @@ class Bot (ChromDevWrapper):
         
         if not donations:
             self.__show_message__ ("No donations to send")
+            return None
             
         # Connect to chrome
         super().__init__(
