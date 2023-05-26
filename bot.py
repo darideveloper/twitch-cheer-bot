@@ -51,7 +51,7 @@ class Bot (ChromDevWrapper):
         self.set_page ("https://ipinfo.io/json")
         body = self.get_text ("body")
         if not '"ip":' in body:
-            self.__show_message__ (f"proxy not working: {self.proxy}", id, is_error=True)
+            self.__show_message__ (f"proxy not working: {self.proxy}", is_error=True)
             return None
         
         # Submit each donation
