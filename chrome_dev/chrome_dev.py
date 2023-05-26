@@ -1,6 +1,6 @@
 import os
 import sys
-import subprocess
+import psutil
 from time import sleep
 
 import PyChromeDevTools
@@ -164,5 +164,6 @@ class ChromDevWrapper ():
         
         self.chrome.close ()
         if kill_chrome:
-            command = "taskkill /F /IM chrome.exe /T > nul"
-            subprocess.run (command, shell=True)
+            for process in psutil.process_iter(['pid', 'name']):
+                if 'chrome' in process.info['name']:
+                    process.kill()
