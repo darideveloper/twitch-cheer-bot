@@ -6,7 +6,7 @@ from random import randint
 
 from api import Api
 from chrome_dev.chrome_dev import ChromDevWrapper
-from credentials import PORT
+from credentials import PORT, DEBUG_USERS
 
 class Bot (ChromDevWrapper):
     
@@ -25,7 +25,7 @@ class Bot (ChromDevWrapper):
                 'button[data-test-selector="chat-rules-show-intro-button"]',
             ],
             'comment_warning_before': '.chat-input-tray__clickable',
-            'comment_warning_after': '[data-test-selector="full-error"]',
+            'comment_warning_after': '[data-test-selector="full-error"], [data-test-selector="inline-error"]',
         }
         self.running = False
         self.error = False
@@ -46,9 +46,19 @@ class Bot (ChromDevWrapper):
             proxy_port=self.proxy["port"]
         )
         
+        # Test proxies loading a page
+        self.set_page ("https://ipinfo.io/json")
+        body = self.get_text ("body")
+        if not '"ip":' in body:
+            self.__show_message__ (f"proxy not working: {self.proxy}", id, is_error=True)
+            return None
+        
         # Submit each donation
         threads = []
         for donation in donations:
+            
+            if DEBUG_USERS and donation["user"] not in DEBUG_USERS:
+                continue
             
             # Format data
             id = donation["id"]
@@ -72,14 +82,12 @@ class Bot (ChromDevWrapper):
             
         # Wait for threads to end
         while True:
-            if not any ([thread.is_alive() for thread in threads]):
-                # End chrome
-                self.quit ()
-                
-                # End wait time
-                break
+            if any ([thread.is_alive() for thread in threads]):
+                sleep (1)
+                continue
             
-            sleep (1)
+            # End chrome
+            self.quit ()
             
             # Raise error when end
             if self.error:
@@ -201,13 +209,6 @@ class Bot (ChromDevWrapper):
         
         # Wait random seconds
         sleep (randint (0, 15))
-        
-        # Test proxies loading a page
-        self.set_page ("https://ipinfo.io/json")
-        body = self.get_text ("body")
-        if not '"ip":' in body:
-            self.__show_message__ (f"proxy not working: {self.proxy}", id, is_error=True)
-            return None
             
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")
