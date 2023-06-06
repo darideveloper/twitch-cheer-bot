@@ -9,7 +9,7 @@ from credentials import CHROME_PATH
 
 class ChromDevWrapper ():
     
-    def __init__ (self, port:int, proxy_host:str="", proxy_port:str="", start_chrome:bool=True):    
+    def __init__ (self, port:int, proxy_host:str="", proxy_port:str="", start_chrome:bool=True, start_killing:bool=True):    
         """ Open chrome and conhect using PyChromeDevTools
 
         Args:
@@ -17,8 +17,12 @@ class ChromDevWrapper ():
             proxy_host (str, optional): Proxy ip. Defaults to "".
             proxy_port (str, optional): Proxy port. Defaults to "".
             start_chrome (bool, optional): Open new chrome instance. Defaults to True.
+            start_killing (bool, optional): Kill (true) all chrome windows before start. Defaults to True.
         """
         
+        if start_killing:
+            self.quit ()
+            
         if start_chrome:
             
             print (f"Starting chrome...")
@@ -162,7 +166,11 @@ class ChromDevWrapper ():
             kill_chrome (bool, optional): Kill (true) all chrome windows. Defaults to True.
         """
         
-        self.chrome.close ()
+        try:
+            self.chrome.close ()
+        except:
+            pass
+        
         if kill_chrome:
             for process in psutil.process_iter(['pid', 'name']):
                 if 'chrome' in process.info['name']:

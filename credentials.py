@@ -11,3 +11,4 @@ if DEBUG_USERS:
     DEBUG_USERS = DEBUG_USERS.split(",")
 else:
     DEBUG_USERS = []
+DEBUG_MODE = os.getenv("DEBUG_MODE") == "True"

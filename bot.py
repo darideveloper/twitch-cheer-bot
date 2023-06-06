@@ -6,9 +6,9 @@ from random import randint
 
 from api import Api
 from chrome_dev.chrome_dev import ChromDevWrapper
-from credentials import PORT, DEBUG_USERS
+from credentials import PORT, DEBUG_USERS, DEBUG_MODE
 
-class Bot (ChromDevWrapper):
+class Bot ():
     
     def __init__ (self): 
         """ Start threads to send donations to twitch chat
@@ -38,20 +38,6 @@ class Bot (ChromDevWrapper):
         
         if not donations:
             self.__show_message__ ("No donations to send")
-            return None
-            
-        # Connect to chrome
-        super().__init__(
-            port=PORT, 
-            proxy_host=self.proxy["host"],
-            proxy_port=self.proxy["port"]
-        )
-        
-        # Test proxies loading a page
-        self.set_page ("https://ipinfo.io/json")
-        body = self.get_text ("body")
-        if not '"ip":' in body:
-            self.__show_message__ (f"proxy not working: {self.proxy}", is_error=True)
             return None
         
         # Submit each donation
@@ -87,9 +73,6 @@ class Bot (ChromDevWrapper):
                 sleep (1)
                 continue
             
-            # End chrome
-            self.quit ()
-            
             # Raise error when end
             if self.error:
                 sys.exit (1)
@@ -115,13 +98,14 @@ class Bot (ChromDevWrapper):
         
         print (f"{prefix}{message}")
         
-    def __login__ (self, cookies:list, id:int, user:str)-> bool:
+    def __login__ (self, cookies:list, id:int, user:str, scraper:ChromDevWrapper)-> bool:
         """ Set cookies to login in twitch
 
         Args:
             cookies (list): cookies to login in twitch with the bot
             id (int): donation id
             user (str): bot name
+            scraper (ChromDevWrapper): chrome dev wrapper instance
 
         Returns:
             bool: True if the login was successful
@@ -130,13 +114,13 @@ class Bot (ChromDevWrapper):
         logged = True
         
         # Set cookies
-        self.delete_cookies ()
-        self.set_page ("https://www.twitch.tv/login")
-        self.set_cookies (cookies)
+        scraper.delete_cookies  ()
+        scraper.set_page ("https://www.twitch.tv/login")
+        scraper.set_cookies (cookies)
         
         # Validate login
-        self.set_page ("https://www.twitch.tv/login")    
-        login_input_visible = self.count_elems (self.selectors["twitch_login_input"])
+        scraper.set_page ("https://www.twitch.tv/login")    
+        login_input_visible = scraper.count_elems (self.selectors["twitch_login_input"])
         if login_input_visible:
             
             # Show error and update status
@@ -150,11 +134,12 @@ class Bot (ChromDevWrapper):
                                        
         return logged 
     
-    def __validate_inputs__ (self, id:int) -> bool:
+    def __validate_inputs__ (self, id:int, scraper:ChromDevWrapper) -> bool:
         """ Validate if inputs are visible and available
 
         Args:
             id (int): donation id
+            scraper (ChromDevWrapper): chrome dev wrapper instance
 
         Returns:
             bool: True if inputs are visible and available
@@ -163,25 +148,26 @@ class Bot (ChromDevWrapper):
         inputs_valid = True
         
         # Validate if constrols are visible
-        comment_textarea_visible = self.count_elems (self.selectors["comment_textarea"])
-        comment_send_btn_visible = self.count_elems (self.selectors["comment_send_btn"])
+        comment_textarea_visible = scraper.count_elems (self.selectors["comment_textarea"])
+        comment_send_btn_visible = scraper.count_elems (self.selectors["comment_send_btn"])
         if not comment_textarea_visible or not comment_send_btn_visible:
             self.__show_message__ ("inputs not visible", id, is_error=True)
             inputs_valid = False
             
         # Validate error messages
-        warning_text = self.get_text (self.selectors["comment_warning_before"])
+        warning_text = scraper.get_text (self.selectors["comment_warning_before"])
         if warning_text:
             self.__show_message__ (f"Inputs not available: {warning_text}", id, is_error=True)
             inputs_valid = False
             
         return inputs_valid
     
-    def __validate_submit__ (self, id:int) -> bool:
+    def __validate_submit__ (self, id:int, scraper:ChromDevWrapper) -> bool:
         """ Validate if donation was send
 
         Args:
             id (int): donation id
+            scraper (ChromDevWrapper): chrome dev wrapper instance
             
         Returns:
             bool: True if donation was send
@@ -189,7 +175,7 @@ class Bot (ChromDevWrapper):
         
         donation_sent = True
         
-        warning_text = self.get_text (self.selectors["comment_warning_after"])
+        warning_text = scraper.get_text (self.selectors["comment_warning_after"])
         if warning_text:
             self.__show_message__ (f"Donation not send: {warning_text}", id, is_error=True)
             donation_sent = False
@@ -212,7 +198,8 @@ class Bot (ChromDevWrapper):
         
         # Wait random seconds
         sleep (randint (0, 15))
-            
+        
+                
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")
         now = datetime.now ()
@@ -223,7 +210,7 @@ class Bot (ChromDevWrapper):
             self.__show_message__ ("time lost", id, is_error=True)
             self.running = False
             return None
-        
+                
         # Wait until donation time
         while donation_time > now:
             sleep (15)
@@ -239,51 +226,67 @@ class Bot (ChromDevWrapper):
         # Show start donation status 
         self.__show_message__ ("starting...", id)
         
+        # Connect to chrome
+        scraper = ChromDevWrapper(
+            port=PORT, 
+            proxy_host=self.proxy["host"],
+            proxy_port=self.proxy["port"]
+        )
+        
+        # Test proxies loading a page
+        scraper.set_page ("https://ipinfo.io/json")
+        body = scraper.get_text ("body")
+        if not '"ip":' in body:
+            self.__show_message__ (f"proxy not working: {self.proxy}", is_error=True)
+            return None
+        
         # Login in twitch and validate
-        logged = self.__login__ (cookies, id, user)
+        logged = self.__login__ (cookies, id, user, scraper)
         if not logged:
             self.running = False
             return None
                     
         # Go to chat page
-        self.set_page (stream_chat_link)
+        scraper.set_page (stream_chat_link)
         sleep (10)
         
         # Validate inputs
-        inputs_valid = self.__validate_inputs__ (id)
+        inputs_valid = self.__validate_inputs__ (id, scraper)
         if not inputs_valid:
             self.running = False
             return None
         
         # Write message
         donation_text = f"cheer{amount} {message}"
-        self.send_data (self.selectors["comment_textarea"], donation_text)
+        scraper.send_data (self.selectors["comment_textarea"], donation_text)
         sleep (5)
         
         # Click in accept buttons
         for selector in self.selectors["comment_accept_buttons"]:
             
-            accept_elem = self.count_elems (selector)
+            accept_elem = scraper.count_elems (selector)
             if accept_elem:
-                self.click (selector)
+                scraper.click (selector)
                 
                 # Write message (again)
                 donation_text = f"cheer{amount} {message}"
-                self.send_data (self.selectors["comment_textarea"], donation_text)
+                scraper.send_data (self.selectors["comment_textarea"], donation_text)
                 
         # Submit donation
-        self.click (self.selectors["comment_send_btn"])
+        if not DEBUG_MODE:
+            scraper.click (self.selectors["comment_send_btn"])
         
-        donation_sent = self.__validate_submit__ (id)
+        donation_sent = self.__validate_submit__ (id, scraper)
         if donation_sent:
             self.__show_message__ ("sent", id)
         
         self.running = False
         
         # Update donation status
-        response = self.api.set_donation_done (id) 
-        if response != "Donation updated":
-            self.__show_message__ ("not updated", id, is_error=True)
+        if not DEBUG_MODE:
+            response = self.api.set_donation_done (id) 
+            if response != "Donation updated":
+                self.__show_message__ ("not updated", id, is_error=True)
 
 if __name__ == "__main__":
     bot = Bot ()
