@@ -24,9 +24,7 @@ class ChromDevWrapper ():
             self.quit ()
             
         if start_chrome:
-            
-            print (f"Starting chrome...")
-            
+                        
             command = f'"{CHROME_PATH}" --remote-debugging-port={port} --remote-allow-origins=*'
             if proxy_host != "" and proxy_port != "":
                 # Start chrome with proxies
