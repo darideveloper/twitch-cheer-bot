@@ -33,10 +33,6 @@ class Api ():
 
             Example:
             {
-                "proxies": {
-                    "host": self.proxy.host,
-                    "port": self.proxy.port,
-                },
                 "donations": [
                     {
                         'id': 20,
@@ -87,6 +83,27 @@ class Api ():
         res = self.__requests_url__(endpoint)
         return res.text        
     
+    def get_proxy (self) -> dict:
+        """ get a random proxy from the API
+
+        Returns:
+            dict: proxy data (host and port)
+            
+            Example:
+            
+            {
+                "proxy": {
+                    "host": self.proxy.host,
+                    "port": self.proxy.port,
+                }
+            }
+        """
+        
+        # Get data from api
+        res = self.__requests_url__("proxy")
+        return res.json()
+        
+        
         
 if __name__ == "__main__":
     api = Api()

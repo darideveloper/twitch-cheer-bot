@@ -33,7 +33,6 @@ class Bot ():
         # Get data from api
         data = self.api.get_donations()
         donations = data["donations"]
-        self.proxy = data["proxy"]
         print ()
         
         if not donations:
@@ -199,6 +198,9 @@ class Bot ():
         # Wait random seconds
         sleep (randint (0, 15))
         
+        # Get proxy
+        proxy = self.api.get_proxy ()["proxy"]      
+        self.__show_message__ (f"proxy: {proxy['host']}:{proxy['port']}", id)
                 
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")
@@ -229,8 +231,8 @@ class Bot ():
         # Connect to chrome
         scraper = ChromDevWrapper(
             port=PORT, 
-            proxy_host=self.proxy["host"],
-            proxy_port=self.proxy["port"]
+            proxy_host=proxy["host"],
+            proxy_port=proxy["port"]
         )
         
         # Test proxies loading a page
