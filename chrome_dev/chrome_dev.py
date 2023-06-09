@@ -164,11 +164,6 @@ class ChromDevWrapper ():
             kill_chrome (bool, optional): Kill (true) all chrome windows. Defaults to True.
         """
         
-        try:
-            self.chrome.close ()
-        except:
-            pass
-        
         if kill_chrome:
             for process in psutil.process_iter(['pid', 'name']):
                 if 'chrome' in process.info['name']:
