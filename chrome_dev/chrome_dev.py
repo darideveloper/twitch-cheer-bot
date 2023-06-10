@@ -167,4 +167,7 @@ class ChromDevWrapper ():
         if kill_chrome:
             for process in psutil.process_iter(['pid', 'name']):
                 if 'chrome' in process.info['name']:
-                    process.kill()
+                    try:
+                        process.kill()
+                    except:
+                        pass
