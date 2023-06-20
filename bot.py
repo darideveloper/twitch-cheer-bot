@@ -239,7 +239,7 @@ class Bot ():
         scraper.set_page ("https://ipinfo.io/json")
         body = scraper.get_text ("body")
         if not '"ip":' in body:
-            self.__show_message__ (f"proxy not working: {self.proxy}", is_error=True)
+            self.__show_message__ (f"proxy not working: {proxy}", is_error=True)
             return None
         
         # Login in twitch and validate

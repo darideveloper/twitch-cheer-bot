@@ -9,7 +9,7 @@ from credentials import CHROME_PATH
 
 class ChromDevWrapper ():
     
-    def __init__ (self, port:int, proxy_host:str="", proxy_port:str="", start_chrome:bool=True, start_killing:bool=True):    
+    def __init__ (self, port:int=9222, proxy_host:str="", proxy_port:str="", start_chrome:bool=True, start_killing:bool=True):    
         """ Open chrome and conhect using PyChromeDevTools
 
         Args:
