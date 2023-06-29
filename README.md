@@ -36,7 +36,7 @@ Project type: **client**
 
 # Related projects
 
-<div align='center'><a href='https://github.com/darideveloper/comunidad-mc' target='_blank'> <img src='https://github.com/darideveloper/comunidad-mc/blob/master/app/static/app/imgs/logo_white.png?raw=true' alt='Comunidad MC' title='Comunidad MC' height='50px'/> </a><a href='https://github.com/darideveloper/twitch-viwer-bot' target='_blank'> <img src='https://github.com/darideveloper/twitch-viwer-bot/blob/master/logo.png?raw=true' alt='Twitch Viwer Bot' title='Twitch Viwer Bot' height='50px'/> </a><a href='https://github.com/darideveloper/twitch-cookies-getter/tree/master' target='_blank'> <img src='https://github.com/darideveloper/twitch-cookies-getter/blob/master/logo.png?raw=true' alt='Twitch Cookies Getter' title='Twitch Cookies Getter' height='50px'/> </a></div>
+<div align='center'><a href='https://github.com/darideveloper/comunidad-mc' target='_blank'> <img src='https://github.com/darideveloper/comunidad-mc/blob/master/app/static/app/imgs/logo_white.png?raw=true' alt='Comunidad MC' title='Comunidad MC' height='50px'/> </a><a href='https://github.com/darideveloper/twitch-viwer-bot' target='_blank'> <img src='https://github.com/darideveloper/twitch-viwer-bot/blob/master/logo.png?raw=true' alt='Twitch Viwer Bot' title='Twitch Viwer Bot' height='50px'/> </a><a href='https://github.com/darideveloper/twitch-cookies-getter' target='_blank'> <img src='https://github.com/darideveloper/twitch-cookies-getter/blob/master/logo.png?raw=true' alt='Twitch Cookies Getter' title='Twitch Cookies Getter' height='50px'/> </a></div>
 
 # Media
 
