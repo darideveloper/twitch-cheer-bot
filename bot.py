@@ -18,13 +18,13 @@ class Bot ():
         self.api = Api()
         self.selectors = {
             'twitch_login_input': '#login-username',
-            'comment_textarea': '[role="textbox"]',
+            'comment_textarea': '[data-a-target="chat-input"]',
             'comment_send_btn': 'button[data-a-target="chat-send-button"]',
             'comment_accept_buttons': [
                 'button[data-test-selector="chat-rules-ok-button"]',
                 'button[data-test-selector="chat-rules-show-intro-button"]',
             ],
-            'comment_warning_before': '.chat-input-tray__clickable',
+            'comment_warning_before': '[data-test-selector="chat-rules-ok-button"]',
             'comment_warning_after': '[data-test-selector="full-error"], [data-test-selector="inline-error"]',
         }
         self.running = False
