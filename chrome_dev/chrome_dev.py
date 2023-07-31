@@ -5,11 +5,9 @@ from time import sleep
 
 import PyChromeDevTools
 
-from credentials import CHROME_PATH
-
 class ChromDevWrapper ():
     
-    def __init__ (self, port:int=9222, proxy_host:str="", proxy_port:str="", start_chrome:bool=True, start_killing:bool=True):    
+    def __init__ (self, chrome_path, port:int=9222, proxy_host:str="", proxy_port:str="", start_chrome:bool=True, start_killing:bool=True):    
         """ Open chrome and conhect using PyChromeDevTools
 
         Args:
@@ -20,12 +18,17 @@ class ChromDevWrapper ():
             start_killing (bool, optional): Kill (true) all chrome windows before start. Defaults to True.
         """
         
+        # Validate chrome path
+        if not os.path.exists (chrome_path) or not os.path.isfile (chrome_path):
+            print (f"Chrome path not found: {chrome_path}")
+            sys.exit ()
+        
         if start_killing:
             self.quit ()
             
         if start_chrome:
                         
-            command = f'"{CHROME_PATH}" --remote-debugging-port={port} --remote-allow-origins=*'
+            command = f'"{chrome_path}" --remote-debugging-port={port} --remote-allow-origins=*'
             if proxy_host != "" and proxy_port != "":
                 # Start chrome with proxies
                 command += f' --proxy-server={proxy_host}:{proxy_port}'
@@ -157,6 +160,40 @@ class ChromDevWrapper ():
         except:
             return ""
         
+    def get_attrib (self, selector:str, attrib:str):
+        """ Get specific attribute from visible element
+
+        Args:
+            selector (str): css selector
+            attrib (str): attribute to get
+        """
+        
+        response = self.chrome.Runtime.evaluate (expression=f"document.querySelector ('{selector}').getAttribute ('{attrib}')")
+        try: 
+            return response[0]['result']["result"]["value"].strip()
+        except:
+            return ""
+        
+    def get_attribs (self, selector:str, attrib:str):
+        """ Get specific attribute from visible elements
+
+        Args:
+            selector (str): css selector
+            attrib (str): attribute to get
+        """
+        
+        script = 'values = [];'
+        script += f'console.log(document.querySelectorAll ("{selector}").forEach(elem => values.push(elem.getAttribute("{attrib}"))));'
+        script += 'values;'
+        response = self.chrome.Runtime.evaluate (expression=script, returnByValue=True)
+        
+        values = []
+        try:
+            values = list(map(lambda value: value.strip(), response[0]['result']["result"]["value"]))
+        except:
+            pass
+        return values
+        
     def quit (self, kill_chrome:bool=True):
         """ Close chrome and conexion   
 
@@ -171,3 +208,16 @@ class ChromDevWrapper ():
                         process.kill()
                     except:
                         pass
+                    
+    def execute_script (self, script:str):
+        """ Run js script and get returns
+
+        Args:
+            script (str): _description_
+        """
+        
+        response = self.chrome.Runtime.evaluate (expression=script)
+        sleep (self.base_wait_time)
+        if response[0]['result']["result"]["type"] == "undefined":
+            return None
+        return response[0]['result']["result"]["value"]
