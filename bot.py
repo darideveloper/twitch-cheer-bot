@@ -6,7 +6,7 @@ from random import randint
 
 from api import Api
 from chrome_dev.chrome_dev import ChromDevWrapper
-from credentials import PORT, DEBUG_USERS, DEBUG_MODE
+from credentials import PORT, DEBUG_USERS, DEBUG_MODE, CHROME_PATH
 
 class Bot ():
     
@@ -53,7 +53,6 @@ class Bot ():
             time = donation["time"]
             message = donation["message"]
             amount = donation["amount"]
-            cookies = donation["cookies"]
             
             # Get streamer name
             streamer = stream_chat_link.split("/")[4]
@@ -62,7 +61,7 @@ class Bot ():
             self.__show_message__ (f"bot: '{user}', time: {time}, stramer: '{streamer}', message: '{message}', amount: {amount}", donation["id"]) 
             
             # Submit donation with thread
-            thread = Thread (target=self.submit_donation, args=(id, stream_chat_link, user, time, message, amount, cookies))
+            thread = Thread (target=self.submit_donation, args=(id, stream_chat_link, user, time, message, amount))
             thread.start()
             threads.append (thread)
             
@@ -97,11 +96,10 @@ class Bot ():
         
         print (f"{prefix}{message}")
         
-    def __login__ (self, cookies:list, id:int, user:str, scraper:ChromDevWrapper)-> bool:
-        """ Set cookies to login in twitch
+    def __login__ (self, id:int, user:str, scraper:ChromDevWrapper)-> bool:
+        """ Validate login in twitch
 
         Args:
-            cookies (list): cookies to login in twitch with the bot
             id (int): donation id
             user (str): bot name
             scraper (ChromDevWrapper): chrome dev wrapper instance
@@ -112,18 +110,13 @@ class Bot ():
         
         logged = True
         
-        # Set cookies
-        scraper.delete_cookies  ()
-        scraper.set_page ("https://www.twitch.tv/login")
-        scraper.set_cookies (cookies)
-        
         # Validate login
         scraper.set_page ("https://www.twitch.tv/login")    
         login_input_visible = scraper.count_elems (self.selectors["twitch_login_input"])
         if login_input_visible:
             
             # Show error and update status
-            self.__show_message__ (f"cookies error, bot: {user}", id, is_error=True)
+            self.__show_message__ (f"login error, bot: {user}", id, is_error=True)
             logged = False
             
             #  Disable user in
@@ -182,7 +175,7 @@ class Bot ():
         return donation_sent
         
     def submit_donation (self, id:int, stream_chat_link:str, user:str,
-                         time_str:str, message:str, amount:int, cookies:list):
+                         time_str:str, message:str, amount:int):
         """ Send donation to twitch chat
 
         Args:
@@ -192,15 +185,10 @@ class Bot ():
             time (str): time text in format "hh:mm:ss"
             message (str): message to send
             amount (int): bits of the donation
-            cookies (list): cookies to login in twitch with the bot
         """
         
         # Wait random seconds
         sleep (randint (0, 15))
-        
-        # Get proxy
-        proxy = self.api.get_proxy ()["proxy"]      
-        self.__show_message__ (f"proxy: {proxy['host']}:{proxy['port']}", id)
                 
         # Donation time
         donation_time = datetime.strptime (time_str, "%H:%M:%S")
@@ -230,20 +218,12 @@ class Bot ():
         
         # Connect to chrome
         scraper = ChromDevWrapper(
-            port=PORT, 
-            proxy_host=proxy["host"],
-            proxy_port=proxy["port"]
+            chrome_path=CHROME_PATH,
+            port=PORT
         )
         
-        # Test proxies loading a page
-        scraper.set_page ("https://ipinfo.io/json")
-        body = scraper.get_text ("body")
-        if not '"ip":' in body:
-            self.__show_message__ (f"proxy not working: {proxy}", is_error=True)
-            return None
-        
         # Login in twitch and validate
-        logged = self.__login__ (cookies, id, user, scraper)
+        logged = self.__login__ (id, user, scraper)
         if not logged:
             self.running = False
             return None
